@@ -15,12 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from .views import HostListCreateView, HostRetrieveUpdateDestroyView, PingHostView
+from django.urls import path,include
+from rest_framework.routers import DefaultRouter
+from host.views import CityViewSet, MachineRoomViewSet, HostViewSet, ping_host
+router = DefaultRouter()
+router.register(r'cities', CityViewSet)
+router.register(r'machine-rooms', MachineRoomViewSet)
+router.register(r'hosts', HostViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('hosts/', HostListCreateView.as_view(), name='host-list-create'),
-    path('hosts/<int:pk>/', HostRetrieveUpdateDestroyView.as_view(), name='host-retrieve-update-destroy'),
-    path('hosts/<int:pk>/ping/', PingHostView.as_view(), name='host-ping'),
+    path('', include(router.urls)),
+    path('ping/<str:ip_address>/', ping_host, name='ping-host'),
 ]

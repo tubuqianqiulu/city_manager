@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'host.apps.HostConfig',
-    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -49,9 +51,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'host.middleware.RequestTimeMiddleware',
 ]
-CRONJOBS = [
-    ('0 0 * * *', 'your_app_name.views.daily_statistics')
-]
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'daily-host-count-statistics': {
+        'task': 'host.tasks.daily_host_count_statistics',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
 
 ROOT_URLCONF = 'city_manager.urls'
 
